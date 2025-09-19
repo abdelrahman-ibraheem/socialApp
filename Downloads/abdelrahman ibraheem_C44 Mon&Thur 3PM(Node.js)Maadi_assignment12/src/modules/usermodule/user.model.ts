@@ -1,20 +1,30 @@
 
 import { Schema } from 'mongoose';
 import { model } from 'mongoose';
-
+type  otpType={
+otp : string,
+expiresAt: Date|undefined
+      
+}
 export interface IUser extends Document  {
   firstname: string;
   lastname: string;
   email: string;
   password: string;
   otp: string;
-  expiresAt: Date;
+  expiresAt?: Date;
   phone: string;
-  emailOtp: {
-    otp: string;
-    expiresAt: Date;
+  emailOtp:  otpType
+  passwordOtp?: otpType,
+    
+      isConfirmed: Boolean ,
+      iscredentialsUpdated: Date
+
+
+
+    
   };
-}
+
 const userSchema = new Schema<IUser>({
 firstname: {
     type: String,
@@ -45,10 +55,27 @@ firstname: {
   emailOtp: {
     otp: String,
     expiresAt: Date,
+      type : undefined,
+  },
+   passwordOtp: {
+    otp: String,
+    expiresAt: Date,
   },
   phone: {
     type: String,
   },
+  isConfirmed: {
+    type: Boolean,
+    default: false, 
+  },
+isCOnfirmed: {
+    type: Boolean,
+    default: false,},
+    iscredentialsUpdated: {
+      type: Date,
+    },
+
+
   }
 }, {
   timestamps: true,

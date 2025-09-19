@@ -16,9 +16,26 @@ export const signupSchema = z.object({
         });
     }
 
-    ctx.addIssue({
-        code: 'custom',
-        path: ['name', 'email'],
-        message: 'hello'
-    });
+
 });
+export const confirmEmailSchema = z.object({
+    email: z.email,
+otp : z.string().length(6) 
+});
+
+
+export const resendOtpSchema = z.object({
+    email: z.email()
+
+})
+export const loginSchema = z.object({
+    email: z.email()
+    , password: z.string().min(8).max(20)
+
+
+})
+export const forgetPasswordSchema = z.object({
+    email: z.email()
+
+
+})

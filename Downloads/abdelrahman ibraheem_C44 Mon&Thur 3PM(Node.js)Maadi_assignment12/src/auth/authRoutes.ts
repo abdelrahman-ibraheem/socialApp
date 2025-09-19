@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import  express from 'express';
 import bcrypt from 'bcrypt';
 import transporter from '../Email/mailer'; // Your Nodemailer transporter
-import  type { userModel,IUser } from '../models/user.model';
+import  type { userModel,IUser } from '../modules/usermodule/user.model';
 import { generateEmailConfirmationToken } from '../utils/tokenGenerator';
   const user = require('../models/user.model').user;
 
