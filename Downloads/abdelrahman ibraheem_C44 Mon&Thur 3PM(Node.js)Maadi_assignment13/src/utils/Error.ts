@@ -67,3 +67,11 @@ export class invalidTokenException extends ApplicationException {
 
   }
 }
+
+export class BadRequestException extends ApplicationException {
+  constructor(msg: string = " bad request ") {
+    super(msg, 409);
+    console.log(this.stack);  
+
+  }
+}

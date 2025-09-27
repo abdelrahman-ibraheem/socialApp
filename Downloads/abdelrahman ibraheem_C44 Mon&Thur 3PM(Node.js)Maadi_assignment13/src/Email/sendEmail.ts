@@ -20,4 +20,6 @@ const transporter = nodemailer.createTransport(transporterOptions);
       subject,
       html,
     });
+    console.log(main.messageId);
+    
   }

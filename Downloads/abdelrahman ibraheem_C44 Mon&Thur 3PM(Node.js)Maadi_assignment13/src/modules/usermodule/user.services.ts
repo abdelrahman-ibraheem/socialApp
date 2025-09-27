@@ -1,27 +1,21 @@
 import {  type NextFunction, type Request, type Response } from 'express'
-import { ExpiredOTPException, NotValidEmail, validationError } from '../../utils/Error';
+import { NOtFoundexception,NotConfirmed,ExpiredOTPException, NotValidEmail ,ApplicationException,InvalidCredentialsException,invalidOtpException} from '../../utils/Error';
 import { UserRepo } from './user.repo';
 import { compareHash, createHash } from '../../utils/hash';
-import  { ApplicationException } from "../../utils/Error";
 import { createOtp } from '../../Email/email.Otp';
-import { userModel } from './user.model';
+import { userModel, type IUser } from './user.model';
 import { template } from '../../utils/generateHTML';
-import { NOtFoundexception } from '../../utils/Error';
 import { emailEmitter } from '../../Email/event.event';
-import type { confirmEmailDTO, resendOtpDTO } from './user.DTO';
+import type { confirmEmailDTO, resendOtpDTO,loginDTO ,forgetPasswordDTO } from './user.DTO';
 import type { signupDTO } from './user.DTO';
 import { successHandler } from '../../Email/successHandler';
-import type { loginDTO ,forgetPasswordDTO} from './user.DTO';
- import { InvalidCredentialsException,invalidOtpException } from '../../utils/Error'; 
- import { NotConfirmed } from '../../utils/Error';
 import { createjwt } from '../../utils/jwt';
-import { id } from 'zod/v4/locales';
-import {  date, success } from 'zod';
-import { customAlphabet } from 'nanoid';
 import{ nanoid } from 'nanoid';
-import{} from './user.model'
 import { TokenTypesEnum, type iRequest } from '../../middleware/auth.middleware';
 import { decodeToken } from '../../middleware/auth.middleware';
+import type { HydratedDocument } from 'mongoose';
+import { uploadMulterFile, uploadSingleLargeFile } from '../../multer/s3.services';
+import path from 'path';
 
  interface IUserServices {
   signUp(req: Request, res: Response, next: NextFunction): Promise<Response>;
@@ -30,7 +24,10 @@ import { decodeToken } from '../../middleware/auth.middleware';
   forgetPassword(req: Request, res: Response, next: NextFunction): Promise<Response>;
   resetPassword(req: Request, res: Response, next: NextFunction): Promise<Response>;
   resendOtp(req: Request, res: Response, next: NextFunction): Promise<Response>;
-  login(req: Request, res: Response, next: NextFunction): Promise<Response>;  
+  login(req: Request, res: Response, next: NextFunction): Promise<Response>; 
+  profileImage(req: Request, res: Response, next: NextFunction): Promise<Response>; 
+  coverImage(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  
 }
 
 
@@ -252,5 +249,28 @@ resetPassword = async (req: Request, res: Response): Promise<Response> => {
   return successHandler({ res, msg: "Password reset successfully" });
 };
 
+profileImage = async (req: Request, res: Response) => {
+  const user = res.locals.user as HydratedDocument<IUser>;
+  const path = await uploadSingleLargeFile({
+    file: req.file as Express.Multer.File
+  });
+
+  user.profileImage = path;   // ✅ works now if added to IUser
+  await user.save();
+
+  return successHandler({ res, data: path });
 }
 
+coverImage = async (req: Request, res: Response) => {
+  const user = res.locals.user as HydratedDocument<IUser>;
+  const paths = await uploadMulterFile({
+    files: req.files as Express.Multer.File[]  
+  });
+
+user.coverImage = paths;  
+await user.save();
+
+  return successHandler({ res, data: paths });
+}
+
+}
