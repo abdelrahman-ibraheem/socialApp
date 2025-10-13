@@ -23,32 +23,6 @@ export const availabilityCondition = (user: HydratedDocument<IUser>) => {
   ];
 };
 
-
-
-
-
-
-
-
-export const PostAvailabilityCond =(user:HydratedDocument<IUser>)=>{
-  return [
-{
-  Availability: PostAvailabilityEnum.PUBLIC
-},
-{
-  Availability: PostAvailabilityEnum.PRIVATE,
-  createdBy: user._id
-},
-{
-  Availability: PostAvailabilityEnum.FRIENDS,
-  createdBy: {
-    $in:[...(user.friends||[])]
-  }
-}
-
-  ]
-}
-
 const PostSchema = new Schema<IPost>(
   {
     content: {
@@ -103,7 +77,6 @@ const PostSchema = new Schema<IPost>(
      toId:{type:Number},
      user1:{type:Number},
      user2:{type:Number},
-
 
 
   },

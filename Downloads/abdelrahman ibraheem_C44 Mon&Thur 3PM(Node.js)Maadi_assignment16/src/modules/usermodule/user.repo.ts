@@ -43,4 +43,8 @@ export class UserRepo extends DBRepo<IUser> {
         const doc = await query.exec();
         return doc; 
     };
+      async updateOne(filter: any, update: any) {
+    return this.model.updateOne(filter, update);
+  }
 }
+

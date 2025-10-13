@@ -1,5 +1,5 @@
 
-import { Schema, type HydratedDocument, type UpdateQuery } from 'mongoose';
+import mongoose, { Schema, type HydratedDocument, type UpdateQuery } from 'mongoose';
 import { model } from 'mongoose';
 import { BadRequestException } from '../../utils/Error';
 import { boolean, date, string } from 'zod';
@@ -33,6 +33,13 @@ export interface IUser extends Document  {
       deleteAt:Date,
       filter: string,
       friends:string,
+        tags: mongoose.Types.ObjectId[];
+      isBlocked: boolean;
+      wasNew?:boolean
+      firstCreation?:boolean
+      plainTextOtp?:string
+        content: string;
+
 
       
 
@@ -90,6 +97,7 @@ isCOnfirmed: {
     slug  :{ 
       type: string
     },
+        
         otpExpires: { type:Date
 },
 tempEmail:{

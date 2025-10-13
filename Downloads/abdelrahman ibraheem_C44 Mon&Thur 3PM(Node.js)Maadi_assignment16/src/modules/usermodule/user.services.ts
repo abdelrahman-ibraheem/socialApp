@@ -30,14 +30,13 @@ import { sendEmail } from "../../utils/Email/sendEmail";
   login(req: Request, res: Response, next: NextFunction): Promise<Response>; 
   profileImage(req: Request, res: Response, next: NextFunction): Promise<Response>; 
   coverImage(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    updatePassword(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    requestEmailChange(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    updateInfo(req: Request, res: Response, next: NextFunction): Promise<Response>;
-
-        confirmEmailChange(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    likePost(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    unlikePost(req: Request, res: Response, next: NextFunction): Promise<Response>;
-    sendTagEmail(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  updatePassword(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  requestEmailChange(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  updateInfo(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  confirmEmailChange(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  likePost(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  unlikePost(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  sendTagEmail(req: Request, res: Response, next: NextFunction): Promise<Response>;
 
 
   
@@ -287,10 +286,6 @@ await user.save();
   return successHandler({ res, data: paths });
 }
 
-
-
-
-/* ----------------- UPDATE PASSWORD ----------------- */
  updatePassword = async (req: Request, res: Response) => {
     try {
       const { userId, oldPassword, newPassword } = req.body;
@@ -314,10 +309,6 @@ await user.save();
     }
   };
 
-
-
-
-  /* ----------------- UPDATE BASIC INFO ----------------- */
   updateInfo = async (req: Request, res: Response) => {
     try {
       const { userId, firstName, lastName, bio } = req.body;
@@ -338,7 +329,6 @@ await user.save();
     }
   };
 
-  /* ----------------- REQUEST EMAIL CHANGE (OTP) ----------------- */
   requestEmailChange = async (req: Request, res: Response) => {
     try {
       const { userId, newEmail } = req.body;
@@ -431,6 +421,68 @@ await user.save();
       await sendEmail(to);
 
       return res.json({ msg: "Email sent successfully" });
+    } catch (error: any) {
+      return res.status(500).json({ msg: error.message });
+    }
+  };
+  sendEmailToTags = async (post: HydratedDocument<IUser>): Promise<void> => {
+    if (!post.tags?.length) return;
+
+    const users = await this.usermodel.find({
+      filter: { _id: { $in: post.tags } },
+    });
+
+    for (const user of users) {
+      await sendEmail({
+        to: user.email,
+        subject: "You were tagged in a post",
+        html: `<p>You were tagged in a post with content: ${post.content}</p>`,});
+    }
+  };
+   blockUser = async (req: Request, res: Response): Promise<Response> => {
+    const { userId } = req.params;
+
+    const user = await this.usermodel.findOne({ filter: { _id: userId } });
+    if (!user) throw new NOtFoundexception("User not found");
+
+    await user.updateOne({ isBlocked: true });
+    return successHandler({ res, msg: "User blocked successfully" });
+  };
+    deleteFriendRequest = async (req: Request, res: Response): Promise<Response> => {
+    const { friendRequestId } = req.params;
+
+    if (!friendRequestId) {
+      return res.status(400).json({ msg: "Friend request ID is required" });
+    }
+
+    await this.usermodel.deleteFriendRequest(Number(friendRequestId));
+    return successHandler({ res, msg: "Friend request deleted" });
+  };
+unFriend = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { friendId } = req.params;
+      const userId = res.locals.user?._id;
+
+      if (!friendId) {
+        return res.status(400).json({ msg: "friendId is required" });
+      }
+      if (!userId) {
+        return res.status(401).json({ msg: "Not authenticated" });
+      }
+
+      // Optional: check that both users exist (good for better errors)
+      const [user, friend] = await Promise.all([
+        this.usermodel.findOne({ filter: { _id: userId } }),
+        this.usermodel.findOne({ filter: { _id: friendId } }),
+      ]);
+
+      if (!user) throw new NOtFoundexception("Current user not found");
+      if (!friend) throw new NOtFoundexception("Friend user not found");
+
+      // perform the unfriend (bidirectional removal)
+      await this.usermodel.unFriend(Number(userId), Number(friendId));
+
+      return successHandler({ res, msg: "User unfriended successfully" });
     } catch (error: any) {
       return res.status(500).json({ msg: error.message });
     }

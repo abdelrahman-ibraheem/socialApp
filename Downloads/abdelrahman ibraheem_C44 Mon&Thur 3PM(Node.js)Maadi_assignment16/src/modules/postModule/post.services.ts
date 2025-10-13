@@ -9,11 +9,16 @@ import { deleteFiles, uploadMulterFile } from "../../utils/multer/s3.services";
 import { NOtFoundexception } from "../../utils/Error";
 import type { IUser } from "../usermodule/user.model";
 import { availabilityCondition } from "./post.Model";
-import { map } from "zod";
+import { sendEmail } from "../../utils/Email/sendEmail";
 interface IpostService {
   createPost(req: Request, res: Response): Promise<Response>;
   updatePost(req: Request, res: Response): Promise<Response>;
   likePost(req: Request, res: Response): Promise<Response>;
+  freezePost (req: Request, res: Response): Promise<Response>,
+  hardDeletePost  (req: Request, res: Response): Promise<Response> 
+  getPostById  (req: Request, res: Response): Promise<Response>
+
+
 }
 export class postServices implements IpostService {
   private postModel = new postRepo();
@@ -172,4 +177,48 @@ if ( newAttachments.length) {
     await post.save();
     return successHandler({ res, data: post });
   };
+   freezePost = async (req: Request, res: Response): Promise<Response> => {
+    const postId = req.params.id;
+
+    const post = await this.postModel.findOne({ filter: { _id: postId } });
+    if (!post) throw new NOtFoundexception("Post not found");
+
+    await post.updateOne({ isFrozen: true });
+    return successHandler({ res, msg: "Post frozen successfully" });
+  };
+   hardDeletePost = async (req: Request, res: Response): Promise<Response> => {
+    const postId = req.params.id;
+
+    const post = await this.postModel.findOne({ filter: { _id: postId } });
+    if (!post) throw new NOtFoundexception("Post not found");
+
+    // Delete all comments + replies related to post
+    await this.postModel.deleteMany({ filter: { postId } });
+
+    // Delete post attachments from S3
+   const hydratedPost = post as HydratedDocument<IPost>;
+   if (Array.isArray(hydratedPost.attachments) && hydratedPost.attachments.length > 0) {
+  await deleteFiles({ urls: hydratedPost.attachments as string[] });
 }
+
+    // Delete the post itself
+    await this.postModel.deleteOne({ filter: { _id: postId } });
+
+    return successHandler({ res, msg: "Post and related comments deleted" });
+  }
+  ;  getPostById = async (req: Request, res: Response): Promise<Response> => {
+    const postId = req.params.id;
+
+    const post = await this.postModel.findOne({
+      filter: { _id: postId },
+    });
+
+    if (!post) throw new NOtFoundexception("Post not found");
+
+    return successHandler({ res, data: post });
+  };
+
+
+}
+
+

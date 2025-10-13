@@ -28,6 +28,14 @@ export enum PostAvailabilityEnum {
   toId: number;
     user1: number;
   user2: number;
+  deleteOne:{type:Function}
+  deleteMany:{type:Function}
+  updateOne:{type:Function}
+  findOne:{type:Function}
+  create:{type:Function}
+  unFriend:{type:Function}
+  deleteFriendRequest:{type:Function}
+replyTo:{type: string},
     status: "pending" | "accepted" | "rejected";
     
 
