@@ -1,14 +1,10 @@
 import { Router } from "express";
 import { UserServices } from "./user.services";
 import { validation } from "../../middleware/validation.middleware";
-import {
-  confirmEmailSchema,
-  forgetPasswordSchema,
-  resendOtpSchema,
-  loginSchema,
-} from "./user.validation";
+import { confirmEmailSchema,forgetPasswordSchema,resendOtpSchema,loginSchema,} from "./user.validation";
 import { auth } from "../../middleware/auth.middleware";
 import { uploadFile } from "../../utils/multer/multer";
+import { chatRoutes } from "../chatmodule/chat.controler";
 
 export const userRouters = {
   base: "/users",
@@ -33,6 +29,7 @@ export const userRouters = {
 };
 
 const router = Router();
+router.use('/:userId/chat', auth, (chatRoutes.base, router));
 const userServices = new UserServices();
 
 // ✅ Auth & Account

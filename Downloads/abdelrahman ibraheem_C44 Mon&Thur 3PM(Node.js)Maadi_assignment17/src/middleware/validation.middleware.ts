@@ -16,7 +16,6 @@ const errors = result.error.issues.map((error :string|any)=>{
    
 });
     console.log({errors:errors.join('')});
-    // throw new validationError(errors.join(''));
 
     };
     

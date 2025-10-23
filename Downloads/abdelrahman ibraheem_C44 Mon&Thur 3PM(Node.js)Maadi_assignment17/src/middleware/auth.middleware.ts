@@ -83,23 +83,3 @@ next();
     }
 }
 
-// const playload = verifyJWT({
-//     token,
-//     secret:tekenType==TokenTypesEnum.access?
-//     Secret: process.env.TOKEN_SECRET as string:
-//     process.env.REFRESH_SECRET as string
-
-// })
-// const user = await this.usermodel.findById({   id:playload.id})
-  
-// if (!user) {
-//   throw new NotFoundException("user not found")
-// }   
-// if (!user.isConfirmed) {
-//   throw new NotConfirmed("please confirm your email first");
-// }   
-// if (user.iscredentialsUpdated.getTime()<(playload.iat as number)*1000) {
-
-//     throw new ApplicationException("token is invalid",409)
-    
-// }

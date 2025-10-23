@@ -6,10 +6,13 @@ import  baseRouter from './routes'
 import { connectDB } from './dp/db.connection'
 import { BadRequestException } from './utils/Error'
 import { getFile } from './utils/multer/s3.services'
-import { userModel } from './modules/usermodule/user.model'
-import { UserRepo } from './modules/usermodule/user.repo'
-import { id } from 'zod/v4/locales'
-import { error } from 'console'
+import { userModel, type IUser } from './modules/usermodule/user.model'
+import { error, log } from 'console'
+import { Server, Socket } from 'socket.io'
+import type { HydratedDocument } from 'mongoose'
+import { decodeToken, TokenTypesEnum } from './middleware/auth.middleware'
+import { connected } from 'process'
+import { initilize } from './modules/getway/getway'
 
 
 
@@ -100,6 +103,15 @@ catch (error) {}
   app.listen(port, () => {
     console.log('server running on port', port)
   })
+
+  const httpServer =  app.listen(port, () => {
+  console.log('server running on port',port);
+
+})
+
+
+initilize(httpServer)
+
 }
 
 module.exports = { bootstrap, app }
